@@ -38,13 +38,19 @@
 #define PAM_BAD_ITEM PAM_SYMBOL_ERR
 #endif
 
-static const char pw[] = "0123456789";
+#ifdef sun
+#define PAM_CONST
+#else
+#define PAM_CONST const
+#endif
+
+static PAM_CONST char pw[] = "0123456789";
 static char *response = "";
 static void *pam_module;
 static enum { TWO_PROMPTS, COMBINED_PASSWORD, COMBINED_PROMPT } conv_mode;
 static int num_prompts_shown = 0;
 
-static int conversation(int num_msg, const struct pam_message **msg,
+static int conversation(int num_msg, PAM_CONST struct pam_message **msg,
                         struct pam_response **resp, void *appdata_ptr) {
   // Keep track of how often the conversation callback is executed.
   ++num_prompts_shown;
@@ -63,11 +69,6 @@ static int conversation(int num_msg, const struct pam_message **msg,
   return PAM_CONV_ERR;
 }
 
-#ifdef sun
-#define PAM_CONST
-#else
-#define PAM_CONST const
-#endif
 int pam_get_item(const pam_handle_t *pamh, int item_type,
                  PAM_CONST void **item)
   __attribute__((visibility("default")));
@@ -105,10 +106,10 @@ int pam_get_item(const pam_handle_t *pamh, int item_type,
 }
 
 int pam_set_item(pam_handle_t *pamh, int item_type,
-                 PAM_CONST void *item)
+                 const void *item)
   __attribute__((visibility("default")));
 int pam_set_item(pam_handle_t *pamh, int item_type,
-                 PAM_CONST void *item) {
+                 const void *item) {
   switch (item_type) {
     case PAM_AUTHTOK:
       if (strcmp((char *)item, pw)) {

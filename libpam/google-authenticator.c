@@ -18,6 +18,10 @@
 
 #define _GNU_SOURCE
 
+#ifdef sun
+#define _POSIX_PTHREAD_SEMANTICS
+#endif
+
 #include <assert.h>
 #include <errno.h>
 #include <dlfcn.h>

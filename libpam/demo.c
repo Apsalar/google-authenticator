@@ -40,7 +40,12 @@ static struct termios old_termios;
 static int jmpbuf_valid;
 static sigjmp_buf jmpbuf;
 
-static int conversation(int num_msg, const struct pam_message **msg,
+#ifdef sun
+#define PAM_CONST
+#else
+#define PAM_CONST const
+#endif
+static int conversation(int num_msg, PAM_CONST struct pam_message **msg,
                         struct pam_response **resp, void *appdata_ptr) {
   if (num_msg == 1 &&
       (msg[0]->msg_style == PAM_PROMPT_ECHO_OFF ||
@@ -75,11 +80,6 @@ static int conversation(int num_msg, const struct pam_message **msg,
   return PAM_CONV_ERR;
 }
 
-#ifdef sun
-#define PAM_CONST
-#else
-#define PAM_CONST const
-#endif
 int pam_get_item(const pam_handle_t *pamh, int item_type,
                  PAM_CONST void **item) {
   switch (item_type) {
@@ -104,7 +104,7 @@ int pam_get_item(const pam_handle_t *pamh, int item_type,
 }
 
 int pam_set_item(pam_handle_t *pamh, int item_type,
-                 PAM_CONST void *item) {
+                 const void *item) {
   switch (item_type) {
     case PAM_AUTHTOK:
       return PAM_SUCCESS;
