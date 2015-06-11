@@ -16,6 +16,10 @@
 // limitations under the License.
 #include "config.h"
 
+#ifdef sun
+#define _POSIX_PTHREAD_SEMANTICS
+#endif
+
 #define _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>
@@ -55,6 +59,12 @@
 
 #define MODULE_NAME "pam_google_authenticator"
 #define SECRET      "~/.google_authenticator"
+
+#ifdef sun
+#define PAM_CONST
+#else
+#define PAM_CONST const
+#endif
 
 typedef struct Params {
   const char *secret_filename_spec;
@@ -112,7 +122,7 @@ static void log_message(int priority, pam_handle_t *pamh,
 }
 
 static int converse(pam_handle_t *pamh, int nargs,
-                    const struct pam_message **message,
+                    PAM_CONST struct pam_message **message,
                     struct pam_response **response) {
   struct pam_conv *conv;
   int retval = pam_get_item(pamh, PAM_CONV, (void *)&conv);
@@ -676,7 +686,7 @@ static int step_size(pam_handle_t *pamh, const char *secret_filename,
 }
 
 static int get_timestamp(pam_handle_t *pamh, const char *secret_filename,
-                         const char **buf) {
+                         PAM_CONST char **buf) {
   int step = step_size(pamh, secret_filename, *buf);
   if (!step) {
     return 0;
@@ -822,7 +832,7 @@ static int rate_limit(pam_handle_t *pamh, const char *secret_filename,
 }
 
 static char *get_first_pass(pam_handle_t *pamh) {
-  const void *password = NULL;
+  PAM_CONST void *password = NULL;
   if (pam_get_item(pamh, PAM_AUTHTOK, &password) == PAM_SUCCESS &&
       password) {
     return strdup((const char *)password);
@@ -831,11 +841,11 @@ static char *get_first_pass(pam_handle_t *pamh) {
 }
 
 static char *request_pass(pam_handle_t *pamh, int echocode,
-                          const char *prompt) {
+                          PAM_CONST char *prompt) {
   // Query user for verification code
-  const struct pam_message msg = { .msg_style = echocode,
+  PAM_CONST struct pam_message msg = { .msg_style = echocode,
                                    .msg       = prompt };
-  const struct pam_message *msgs = &msg;
+  PAM_CONST struct pam_message *msgs = &msg;
   struct pam_response *resp = NULL;
   int retval = converse(pamh, 1, &msgs, &resp);
   char *ret = NULL;

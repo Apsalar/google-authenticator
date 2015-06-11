@@ -49,3 +49,4 @@ mobile/blackberry/.*\.jar
 mobile/blackberry/.*\.rapc
 mobile/blackberry/src/com/google/authenticator/blackberry/Build.java
 mobile/.metadata/
+security/
