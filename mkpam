@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "building 64 bit google-authenticator module"
+echo "Building 64 bit google-authenticator module"
 
 mkdir -p security/64
 
@@ -10,6 +10,9 @@ cd libpam
 gmake
 mv .libs/pam_google_authenticator.so ../security/64/
 
+echo "Building 32 bit google-authenticator module"
+
 gmake clean
 CC='/opt/local/gcc47/bin/gcc -m32' ./configure
-
+gmake
+mv .libs/pam_google_authenticator.so ../security/
